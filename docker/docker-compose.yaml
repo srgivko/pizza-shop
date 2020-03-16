@@ -1,0 +1,69 @@
+# Use postgres/example user/password credentials
+#init scripts are run when there postgres-data folder is created. If the postgres-data folder is initialized, the init scripts will be ignored.
+version: '3.1'
+
+services:
+
+  login-service-postgres:
+    container_name: login-service-postgres
+    build:
+      context: ${LOGIN_SERVICE_DB_PATH_CONTEXT}
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+    - 5435:5432
+    environment:
+      POSTGRES_USER: ${LOGIN_SERVICE_DB_ROOT_LOGIN}
+      POSTGRES_PASSWORD: ${LOGIN_SERVICE_DB_ROOT_PASSWORD}
+    volumes:
+      - ${LOGIN_SERVICE_DB_PATH_INIT_SQL_HOST}:${LOGIN_SERVICE_DB_PATH_INIT_SQL_CONTAINER}
+      - ${LOGIN_SERVICE_DB_PATH_HOST}:${LOGIN_SERVICE_DB_PATH_CONTAINER}
+
+  login-service:
+    container_name: login-service
+    build:
+      context: ${LOGIN_SERVICE_CONTEXT}
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8085:8080
+    environment:
+      spring.datasource.username: ${LOGIN_SERVICE_DB_ROOT_LOGIN}
+      spring.datasource.password: ${LOGIN_SERVICE_DB_ROOT_PASSWORD}
+      spring.datasource.url: jdbc:postgresql://login-service-postgres/login_service_database
+      jwt.secret=secret: ${JWT_SECRET_TOKEN}
+    depends_on:
+      - login-service-postgres
+    links:
+      - login-service-postgres
+
+
+#  mongo:
+#    container_name: mongo
+#    build:
+#      context: ./mongo
+#      dockerfile: Dockerfile
+#    restart: always
+#    ports:
+#      - 27017:27017
+#    environment:
+#      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+#      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+#      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+#    volumes:
+#    - ${MONGO_PATH_HOST}:${MONGO_PATH_CONTAINER}
+#    - ${MONGO_CREATION_SCRIPT_PATH_HOST}:${MONGO_CREATION_SCRIPT_PATH_CONTAINER}
+#
+#  mongo-express:
+#    container_name: mongo-express
+#    image: mongo-express
+#    restart: always
+#    ports:
+#      - 8081:8081
+#    environment:
+#      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+#      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+#    depends_on:
+#      - mongo
+#    links:
+#      - mongo
