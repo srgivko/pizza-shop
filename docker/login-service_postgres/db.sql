@@ -1,1 +1,1 @@
-CREATE DATABASE login_service_database;
+CREATE DATABASE login_db;

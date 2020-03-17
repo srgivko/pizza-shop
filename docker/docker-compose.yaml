@@ -30,12 +30,44 @@ services:
     environment:
       spring:datasource.username: ${LOGIN_SERVICE_DB_ROOT_LOGIN}
       spring.datasource.password: ${LOGIN_SERVICE_DB_ROOT_PASSWORD}
-      spring.datasource.url: jdbc:postgresql://login-service-postgres/login_service_database
+      spring.datasource.url: jdbc:postgresql://login-service-postgres/login_db
       jwt.secret=secret: ${JWT_SECRET_TOKEN}
     depends_on:
       - login-service-postgres
     links:
       - login-service-postgres
+
+  mail-service-postgres:
+    container_name: mail-service_postgres
+    build:
+      context: ${MAIL_SERVICE_DB_PATH_CONTEXT}
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 5436:5432
+    environment:
+      POSTGRES_USER: ${MAIL_SERVICE_DB_ROOT_LOGIN}
+      POSTGRES_PASSWORD: ${MAIL_SERVICE_DB_ROOT_PASSWORD}
+    volumes:
+      - ${MAIL_SERVICE_DB_PATH_INIT_SQL_HOST}:${MAIL_SERVICE_DB_PATH_INIT_SQL_CONTAINER}
+      - ${MAIL_SERVICE_DB_PATH_HOST}:${MAIL_SERVICE_DB_PATH_CONTAINER}
+
+  mail-service:
+    container_name: mail-service
+    build:
+      context: ${MAIL_SERVICE_CONTEXT}
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8086:8080
+    environment:
+      spring:datasource.username: ${MAIL_SERVICE_DB_ROOT_LOGIN}
+      spring.datasource.password: ${MAIL_SERVICE_DB_ROOT_PASSWORD}
+      spring.datasource.url: jdbc:postgresql://mail-service-postgres/mail_db
+    depends_on:
+      - mail-service-postgres
+    links:
+      - mail-service-postgres
 
 
 #  mongo:
