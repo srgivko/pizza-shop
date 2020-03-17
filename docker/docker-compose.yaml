@@ -28,7 +28,7 @@ services:
     ports:
       - 8085:8080
     environment:
-      spring.datasource.username: ${LOGIN_SERVICE_DB_ROOT_LOGIN}
+      spring:datasource.username: ${LOGIN_SERVICE_DB_ROOT_LOGIN}
       spring.datasource.password: ${LOGIN_SERVICE_DB_ROOT_PASSWORD}
       spring.datasource.url: jdbc:postgresql://login-service-postgres/login_service_database
       jwt.secret=secret: ${JWT_SECRET_TOKEN}

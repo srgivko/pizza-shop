@@ -18,6 +18,7 @@
     <modules>
         <module>web</module>
         <module>login-service</module>
+        <module>mail-service</module>
     </modules>
 
 
